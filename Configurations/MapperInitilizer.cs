@@ -9,10 +9,11 @@ public class MapperInitilizer : Profile
 {
     public MapperInitilizer()
     {
-        CreateMap<Country,CountryDTO>().ReverseMap();
-        CreateMap<Country,CreateCountryDTO>().ReverseMap();
-        CreateMap<Hotel,HotelDTO>().ReverseMap();
-        CreateMap<Hotel,CreateHotelDTO >().ReverseMap();
-        CreateMap<ApiUser,   UserDTO>().ReverseMap();
+        CreateMap<Country, CountryDTO>().ReverseMap();
+        CreateMap<Country, UpdateCountryDTO>().ReverseMap();
+        CreateMap<Country, CreateCountryDTO>().ReverseMap();
+        CreateMap<Hotel, HotelDTO>().ReverseMap();
+        CreateMap<Hotel, CreateHotelDTO>().ReverseMap();
+        CreateMap<ApiUser, UserDTO>().ReverseMap();
     }
 }
