@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HotelListing.IRepository;
 using HotelListing.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,7 +26,7 @@ public class HotelController : ControllerBase
     {
         try
         {
-
+            
             var hotels = await _unitOfWork.Hotels.GetAll();
             var result = _mapper.Map<IList<HotelDTO>>(hotels);
             return Ok(result);
@@ -38,7 +39,9 @@ public class HotelController : ControllerBase
         }
     }
 
+
      [HttpGet("{id:int}")]
+      [Authorize]
     public async Task<IActionResult> GetHotels(int id)
     {
         try

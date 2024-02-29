@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HotelListing.Data;
 using HotelListing.Models;
 using Hotels.Data;
 
@@ -12,5 +13,6 @@ public class MapperInitilizer : Profile
         CreateMap<Country,CreateCountryDTO>().ReverseMap();
         CreateMap<Hotel,HotelDTO>().ReverseMap();
         CreateMap<Hotel,CreateHotelDTO >().ReverseMap();
+        CreateMap<ApiUser,   UserDTO>().ReverseMap();
     }
 }
