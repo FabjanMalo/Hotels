@@ -10,7 +10,7 @@ public class DatabaseContext : IdentityDbContext<ApiUser>
 {
     public DatabaseContext(DbContextOptions options) : base(options)
     { }
-    DbSet<Country> Countries { get; set; }
+    public DbSet<Country> Countries { get; set; }
     DbSet<Hotel> Hotels { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {

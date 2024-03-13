@@ -1,7 +1,10 @@
 ﻿using HotelListing.IRepository;
+using HotelListing.Models;
 using Hotels.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System.Linq.Expressions;
+using X.PagedList;
 
 namespace HotelListing.Repository;
 
@@ -61,6 +64,22 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         }
 
         return await query.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<IPagedList<T>> GetPagedList(RequestParams requestParams,List<string> includes = null)
+    {
+        IQueryable<T> query = _db;
+
+        if (includes != null)
+        {
+            foreach (var includeProperty in includes)
+            { 
+                query = query.Include(includeProperty);
+            }
+        }
+
+        return await query.AsNoTracking().
+            ToPagedListAsync(requestParams.pageNumber,requestParams.pageSize);
     }
 
     public async Task Insert(T entity)

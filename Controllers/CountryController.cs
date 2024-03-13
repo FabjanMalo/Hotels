@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelListing.Controllers;
+[ApiVersion("1.0")]
 [Route("api/[controller]")]
 [ApiController]
 public class CountryController : ControllerBase
@@ -14,42 +15,30 @@ public class CountryController : ControllerBase
     private readonly ILogger<CountryController> _logger;
     private readonly IMapper _mapper;
 
-    public CountryController(IUnitOfWork unitOfWork, ILogger<CountryController> logger, IMapper mapper)
+  
+   public CountryController(IUnitOfWork unitOfWork, ILogger<CountryController> logger, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _mapper = mapper;
     }
+  
     [HttpGet]
-    public async Task<IActionResult> GetCountries()
+    
+    public async Task<IActionResult> GetCountries([FromQuery] RequestParams requestParams)
     {
-        try
-        {
-            var countries = await _unitOfWork.Countries.GetAll();
-            var result = _mapper.Map<IList<CountryDTO>>(countries);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Something went wrong in the {nameof(GetCountries)}");
-            return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-        }
+        var countries = await _unitOfWork.Countries.GetPagedList(requestParams);
+        var result = _mapper.Map<IList<CountryDTO>>(countries);
+        return Ok(result);
     }
 
+   
     [HttpGet("{id:int}", Name = "GetCountry")]
     public async Task<IActionResult> GetCountry(int id)
     {
-        try
-        {
-            var country = await _unitOfWork.Countries.Get(co => co.Id == id, new List<string> { "Hotels" });
-            var result = _mapper.Map<CountryDTO>(country);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Something went wrong in the {nameof(GetCountries)}");
-            return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-        }
+        var country = await _unitOfWork.Countries.Get(co => co.Id == id, new List<string> { "Hotels" });
+        var result = _mapper.Map<CountryDTO>(country);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -64,19 +53,12 @@ public class CountryController : ControllerBase
             _logger.LogError($"Invalid POST Attempt in {nameof(CreateCountry)}");
             return BadRequest(ModelState);
         }
-        try
-        {
-            var country = _mapper.Map<Country>(countryDTO);
-            await _unitOfWork.Countries.Insert(country);
-            await _unitOfWork.Save();
 
-            return CreatedAtRoute("GetCountry", new { id = country.Id }, country);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Something went wrong in the {nameof(CreateCountry)}");
-            return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-        }
+        var country = _mapper.Map<Country>(countryDTO);
+        await _unitOfWork.Countries.Insert(country);
+        await _unitOfWork.Save();
+
+        return CreatedAtRoute("GetCountry", new { id = country.Id }, country);
     }
 
     [HttpPut("{id:int}")]
@@ -92,26 +74,19 @@ public class CountryController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        try
-        {
-            var country = await _unitOfWork.Countries.Get(q => q.Id == id);
-            if (country == null)
-            {
-                _logger.LogError($"Invalid UPDATE Attempt in {nameof(UpdateCountry)}");
-                return BadRequest("Submitted Data Is Valid");
-            }
 
-            country = _mapper.Map(countryDTO, country);
-            _unitOfWork.Countries.Update(country);
-            await _unitOfWork.Save();
-
-            return NoContent();
-        }
-        catch (Exception ex)
+        var country = await _unitOfWork.Countries.Get(q => q.Id == id);
+        if (country == null)
         {
-            _logger.LogError(ex, $"Something went wrong in the {nameof(UpdateCountry)}");
-            return StatusCode(500, "Internal Server Error. Please Try Again Later.");
+            _logger.LogError($"Invalid UPDATE Attempt in {nameof(UpdateCountry)}");
+            return BadRequest("Submitted Data Is Valid");
         }
+
+        country = _mapper.Map(countryDTO, country);
+        _unitOfWork.Countries.Update(country);
+        await _unitOfWork.Save();
+
+        return NoContent();
     }
 
     [HttpDelete("{id:int}")]
@@ -127,25 +102,18 @@ public class CountryController : ControllerBase
             return BadRequest();
         }
 
-        try
+        var country = await _unitOfWork.Countries.Get(q => q.Id == id);
+        if (country == null)
         {
-            var country = await _unitOfWork.Countries.Get(q => q.Id == id);
-            if (country == null)
-            {
-                _logger.LogError($"Invalid UPDATE Attempt in {nameof(DeleteCountry)}");
-                return BadRequest("Submitted Data Is Valid");
-            }
-
-            await _unitOfWork.Countries.Delete(id);
-            await _unitOfWork.Save();
-
-            return NoContent();
+            _logger.LogError($"Invalid UPDATE Attempt in {nameof(DeleteCountry)}");
+            return BadRequest("Submitted Data Is Valid");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Something went wrong in the {nameof(DeleteCountry)}");
-            return StatusCode(500, "Internal Server Error. Please Try Again Later.");
-        }
+
+        await _unitOfWork.Countries.Delete(id);
+        await _unitOfWork.Save();
+
+        return NoContent();
+
     }
 
 }
